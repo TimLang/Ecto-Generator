@@ -28,8 +28,12 @@ defmodule Model_Generator do
     # Make the directory if it doesn't exist
     File.mkdir_p("./output/#{db}/")
 
+    # Downcased table
+    lc_table = String.downcase(table)
+    lc_db = String.downcase(db)
+
     # Get the filename
-    filename = "./output/#{db}/" <> String.downcase(db) <> "_" <> String.downcase(table) <> ".ex"
+    filename = "./output/#{db}/#{lc_db}_#{lc_table}.ex"
 
     # rm the file first
     File.rm filename
@@ -38,9 +42,11 @@ defmodule Model_Generator do
     {:ok, file} = File.open(filename, [:append])
 
     # Write the generic first two lines
-    IO.binwrite(file, "defmodule #{db}.#{table} do\n")
-    IO.binwrite(file, "  use Ecto.Schema\n\n")
-    IO.binwrite(file, "  schema \"" <> String.downcase(table) <> "\" do\n")
+    IO.binwrite file,
+    ~s(defmodule #{db}.#{table} do
+  use Ecto.Schema
+
+  schema \"#{lc_table}\" do\n)
 
     # Loop through each row, outputting its name and type
     Enum.each rows, fn(row) ->
@@ -55,6 +61,8 @@ defmodule Model_Generator do
 
     # Close file reference
     File.close(file)
+
+    IO.puts "Model created: #{filename}"
   end
 
   # Get the type of a row
@@ -62,13 +70,13 @@ defmodule Model_Generator do
 
     # Match the type and return the atom representing it
     case row do
-      {_, type} when type in ["int", "bigint", "mediumint", "smallint"] ->
+      {_, type} when type in ["int", "bigint", "mediumint", "smallint", "tinyint"] ->
         ":integer"
       {_, type} when type in ["varchar", "text", "char", "year", "mediumtext", "longtext", "tinytext"] ->
         ":string"
       {_, type} when type in ["decimal", "float", "double"] ->
         ":float"
-      {_, type} when type in ["tinyint", "bit"] ->
+      {_, type} when type in ["bit"] ->
         ":boolean"
       {_, type} when type in ["date"] ->
         ":date"
