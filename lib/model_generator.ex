@@ -18,21 +18,38 @@ defmodule Model_Generator do
 
   # Perform query to get schema and generate results
   def generate(connection, db, table) do
-    {:ok, result} = Mariaex.Connection.query(connection, "SELECT column_name, data_type FROM information_schema.columns WHERE table_name=?;", [table])
+    {:ok, result} = Mariaex.Connection.query(connection, "SELECT column_name, data_type, CASE WHEN `COLUMN_KEY` = 'PRI' THEN '1' ELSE NULL END AS primary_key FROM information_schema.columns WHERE table_name=? AND table_schema=?;", [table, db])
+
     write_model(db, table, result.rows)
   end
 
   # Loop through the rows and output to a file
   defp write_model(db, table, rows) do
 
-    # Make the directory if it doesn't exist
-    File.mkdir_p("./output/#{db}/")
-
-    # Downcased table
+		# Downcased table and db so we can interpolate
     lc_table = String.downcase(table)
     lc_db = String.downcase(db)
 
-    # Get the filename
+		# Map the rows to their associated types
+		mapped_rows = Enum.map rows, fn {name, type, is_primary} ->
+      { name, get_type(type), is_primary }
+    end
+
+    primary_key = Enum.find mapped_rows, fn(row) ->
+      elem(row, 2) == "1"
+    end
+
+		# Render the schema template
+		output = EEx.eval_file("templates/schema.eex", [db: db, table: table, primary_key: primary_key, columns: mapped_rows, lc_table: lc_table, lc_db: lc_db])
+
+    # Make the directory if it doesn't exist
+    File.mkdir_p("./output/#{db}/")
+
+    # Downcased table and db so we can interpolate
+    lc_table = String.downcase(table)
+    lc_db = String.downcase(db)
+
+    # Create the filename
     filename = "./output/#{db}/#{lc_db}_#{lc_table}.ex"
 
     # rm the file first
@@ -41,23 +58,8 @@ defmodule Model_Generator do
     # Fencepost plant, filenaming is 'dbname_tablename.ex'
     {:ok, file} = File.open(filename, [:append])
 
-    # Write the generic first two lines
-    IO.binwrite file,
-    ~s(defmodule #{db}.#{table} do
-  use Ecto.Schema
-
-  schema \"#{lc_table}\" do\n)
-
-    # Loop through each row, outputting its name and type
-    Enum.each rows, fn(row) ->
-      # Elixir atoms don't have a "raw output" function so we need to
-      # fake it
-      fieldName = ":" <> elem(row, 0)
-      IO.binwrite(file, "    field #{fieldName}, " <> get_type(row) <> "\n")
-    end
-
-    # Write the generic last two lines
-    IO.binwrite(file, "  end\nend")
+    # Write the template to the file
+    IO.binwrite file, output
 
     # Close file reference
     File.close(file)
@@ -66,28 +68,26 @@ defmodule Model_Generator do
   end
 
   # Get the type of a row
-  defp get_type(row) do
+  def get_type(row) do
 
     # Match the type and return the atom representing it
     case row do
-      {_, type} when type in ["int", "bigint", "mediumint", "smallint", "tinyint"] ->
+      type when type in ["int", "bigint", "mediumint", "smallint", "tinyint"] ->
         ":integer"
-      {_, type} when type in ["varchar", "text", "char", "year", "mediumtext", "longtext", "tinytext"] ->
+      type when type in ["varchar", "text", "char", "year", "mediumtext", "longtext", "tinytext", "enum"] ->
         ":string"
-      {_, type} when type in ["decimal", "float", "double"] ->
+      type when type in ["decimal", "float", "double"] ->
         ":float"
-      {_, type} when type in ["bit"] ->
+      type when type in ["bit"] ->
         ":boolean"
-      {_, type} when type in ["date"] ->
+      type when type in ["date"] ->
         ":date"
-      {_, type} when type in ["datetime"] ->
+      type when type in ["datetime", "timestamp"] ->
         ":datetime"
-      {_, type} when type in ["timestamp", "time"] ->
+      type when type in ["time"] ->
         ":time"
-      {_, type} when type in ["blob"] ->
+      type when type in ["blob"] ->
         ":binary"
-      {_, type} when type in ["enum"] ->
-        "{:array, :string}"
     end
   end
 end

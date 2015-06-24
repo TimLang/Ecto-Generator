@@ -11,7 +11,7 @@ defmodule CLI do
         # Turn the list into a map of key value pairs and return
         parsedOptions = Enum.into(parsedOptions, %{})
 
-        # Check for hostname and database
+        # Check for shard and database
         if (!parsedOptions[:hostname] || !parsedOptions[:database]) do
           IO.puts "--hostname and --database are required"
           false
@@ -21,11 +21,11 @@ defmodule CLI do
         end
 
       arg_count when arg_count === 0 ->
-        IO.puts "Usage: mix run generate.exs --hostname <hostname> --database <database> --table <table>"
+        IO.puts "Usage: mix generate --hostname <hostname> --database <database> --table <table> --username <username> --password <password>"
         false
       # Fallback
       _ ->
-        IO.puts "Usage: mix run generate.exs --hostname <hostname> --database <database> --table <table>"
+        IO.puts "Usage: mix generate --hostname <hostname> --database <database> --table <table> --username <username> --password <password>"
         false
     end
   end

@@ -32,3 +32,5 @@ defmodule ModelGenerator.Mixfile do
     ]
   end
 end
+
+

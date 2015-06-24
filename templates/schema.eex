@@ -1,0 +1,11 @@
+defmodule <%= db <> "." <> table  %> do
+  use Ecto.Model
+
+<%= if is_tuple(primary_key) do %>
+  @primary_key { :<%= String.downcase(elem(primary_key,0)) %>, :integer, [] }
+<% end %>
+
+  schema "<%= table %>" do<%= for column <- columns do %>
+    field :<%= String.downcase(elem(column,0)) %>, <%= elem(column, 1) %><% end %>
+	end
+end
