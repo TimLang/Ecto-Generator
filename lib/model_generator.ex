@@ -17,14 +17,14 @@ defmodule Model_Generator do
   end
 
   # Perform query to get schema and generate results
-  def generate(connection, db, table) do
+  def generate(connection, db, table, project_name) do
     {:ok, result} = Mariaex.Connection.query(connection, "SELECT column_name, data_type, CASE WHEN `COLUMN_KEY` = 'PRI' THEN '1' ELSE NULL END AS primary_key FROM information_schema.columns WHERE table_name=? AND table_schema=?;", [table, db])
 
-    write_model(db, table, result.rows)
+    write_model(db, table, result.rows, project_name)
   end
 
   # Loop through the rows and output to a file
-  defp write_model(db, table, rows) do
+  defp write_model(db, table, rows, project_name) do
 
 		# Downcased table and db so we can interpolate
     lc_table = String.downcase(table)
@@ -40,7 +40,7 @@ defmodule Model_Generator do
     end
 
 		# Render the schema template
-		output = EEx.eval_file("templates/schema.eex", [db: db, table: table, primary_key: primary_key, columns: mapped_rows, lc_table: lc_table, lc_db: lc_db])
+		output = EEx.eval_file("templates/schema.eex", [db: db, project_name: project_name, table: table, primary_key: primary_key, columns: mapped_rows, lc_table: lc_table, lc_db: lc_db])
 
     # Make the directory if it doesn't exist
     File.mkdir_p("./output/#{db}/")
@@ -81,9 +81,9 @@ defmodule Model_Generator do
       type when type in ["bit"] ->
         ":boolean"
       type when type in ["date"] ->
-        ":date"
+        "Ecto.Date"
       type when type in ["datetime", "timestamp"] ->
-        ":datetime"
+        "Ecto.DateTime"
       type when type in ["time"] ->
         ":time"
       type when type in ["blob"] ->

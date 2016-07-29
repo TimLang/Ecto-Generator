@@ -19,11 +19,11 @@ defmodule Mix.Tasks.Generate do
 
 		# If they provided a table get its structure and generate a model based on it
 		if args[:table] do
-			Model_Generator.generate(connection, args[:database], args[:table])
+			Model_Generator.generate(connection, args[:database], args[:table], args[:project])
 		else
 			tables = Model_Generator.get_tables(connection, args[:database])
 			Enum.each tables, fn(table) ->
-				Model_Generator.generate(connection, args[:database], elem(table, 0))
+				Model_Generator.generate(connection, args[:database], elem(table, 0), args[:project])
 			end
 		end
 

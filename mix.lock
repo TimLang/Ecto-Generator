@@ -1,4 +1,5 @@
-%{"decimal": {:hex, :decimal, "1.1.0"},
+%{"decimal": {:hex, :decimal, "1.1.0", "3333732f17a90ff3057d7ab8c65f0930ca2d67e15cca812a91ead5633ed472fe", [:mix], []},
   "ecto": {:hex, :ecto, "0.9.0"},
-  "mariaex": {:hex, :mariaex, "0.1.4"},
+  "inflex": {:hex, :inflex, "1.4.1", "7b7aedff806f43a43c21b6ef9ae5c83ed9c1322cf80f1935882856bcd1aa87c6", [:mix], []},
+  "mariaex": {:hex, :mariaex, "0.1.4", "f99c5b7baa6ac88938fafd2ed10152c0fbb2f17cca11c981430bc74ca508fd9d", [:mix], [{:decimal, "~> 1.0", [hex: :decimal, optional: false]}]},
   "poolboy": {:hex, :poolboy, "1.4.2"}}

@@ -28,7 +28,8 @@ defmodule ModelGenerator.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:mariaex, "~> 0.1"}
+      {:mariaex, "~> 0.1"},
+      {:inflex, "~> 1.4.1"}
     ]
   end
 end
