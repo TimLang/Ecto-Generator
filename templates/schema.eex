@@ -3,8 +3,8 @@ defmodule <%= (project_name || db) <> "." <> String.capitalize(table) |> String.
 <%= if is_tuple(primary_key) do %>
   @primary_key { :<%= String.downcase(elem(primary_key,0)) %>, :integer, [] }
 <% end %>
-  schema "<%= table %>" do<%= for column <- columns do %>
-    <%= if elem(column, 0) != elem(primary_key, 0) do %>field :<%= String.downcase(elem(column,0)) %>, <%= elem(column, 1) %><% end %><% end %>
+  schema "<%= table %>" do<%= for column <- columns, elem(column, 0) != elem(primary_key, 0) do %>
+    field :<%= String.downcase(elem(column,0)) %>, <%= elem(column, 1) %><% end %>
 
   end
 end
