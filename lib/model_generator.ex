@@ -1,6 +1,6 @@
 defmodule ModelGenerator do
 
-  def start(adapter_name, %Config{} = config, project_name \\ "Entry") do
+  def start(adapter_name, %Config{} = config, project_name \\ nil) do
     {:ok, pid} = call(adapter_name, :get_pid, [config]) 
     tables = call(adapter_name, :get_tables, [pid])
 
@@ -41,14 +41,15 @@ defmodule ModelGenerator do
 		output = EEx.eval_file("templates/schema.eex", [db: db, project_name: project_name, table: table, primary_key: primary_key, columns: mapped_rows, lc_table: lc_table, lc_db: lc_db])
 
     # Make the directory if it doesn't exist
-    File.mkdir_p("./output/#{db}/")
+    model_dir = project_name || db
+    File.mkdir_p("./output/#{model_dir}/")
 
     # Downcased table and db so we can interpolate
     lc_table = String.downcase(table)
     lc_db = String.downcase(db)
 
     # Create the filename
-    filename = "./output/#{db}/#{lc_db}_#{lc_table}.ex"
+    filename = "./output/#{model_dir}/#{String.replace_suffix(lc_table, "s", "")}.ex"
 
     # rm the file first
     File.rm filename
