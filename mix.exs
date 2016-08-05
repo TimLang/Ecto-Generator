@@ -14,7 +14,7 @@ defmodule ModelGenerator.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger, :mariaex]]
+    [applications: [:logger, :mariaex, :postgrex]]
   end
 
   # Dependencies can be Hex packages:
@@ -29,6 +29,7 @@ defmodule ModelGenerator.Mixfile do
   defp deps do
     [
       {:mariaex, "~> 0.1"},
+      {:postgrex, "~> 0.11.2"},
       {:inflex, "~> 1.4.1"}
     ]
   end

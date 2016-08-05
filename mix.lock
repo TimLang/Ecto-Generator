@@ -1,5 +1,8 @@
-%{"decimal": {:hex, :decimal, "1.1.0", "3333732f17a90ff3057d7ab8c65f0930ca2d67e15cca812a91ead5633ed472fe", [:mix], []},
+%{"connection": {:hex, :connection, "1.0.4", "a1cae72211f0eef17705aaededacac3eb30e6625b04a6117c1b2db6ace7d5976", [:mix], []},
+  "db_connection": {:hex, :db_connection, "1.0.0-rc.4", "fad1f772c151cc6bde82412b8d72319968bc7221df8ef7d5e9d7fde7cb5c86b7", [:mix], [{:connection, "~> 1.0.2", [hex: :connection, optional: false]}, {:poolboy, "~> 1.5", [hex: :poolboy, optional: true]}, {:sbroker, "~> 1.0.0-beta.3", [hex: :sbroker, optional: true]}]},
+  "decimal": {:hex, :decimal, "1.1.0", "3333732f17a90ff3057d7ab8c65f0930ca2d67e15cca812a91ead5633ed472fe", [:mix], []},
   "ecto": {:hex, :ecto, "0.9.0"},
   "inflex": {:hex, :inflex, "1.4.1", "7b7aedff806f43a43c21b6ef9ae5c83ed9c1322cf80f1935882856bcd1aa87c6", [:mix], []},
   "mariaex": {:hex, :mariaex, "0.1.4", "f99c5b7baa6ac88938fafd2ed10152c0fbb2f17cca11c981430bc74ca508fd9d", [:mix], [{:decimal, "~> 1.0", [hex: :decimal, optional: false]}]},
-  "poolboy": {:hex, :poolboy, "1.4.2"}}
+  "poolboy": {:hex, :poolboy, "1.4.2"},
+  "postgrex": {:hex, :postgrex, "0.11.2", "139755c1359d3c5c6d6e8b1ea72556d39e2746f61c6ddfb442813c91f53487e8", [:mix], [{:connection, "~> 1.0", [hex: :connection, optional: false]}, {:db_connection, "~> 1.0-rc", [hex: :db_connection, optional: false]}, {:decimal, "~> 1.0", [hex: :decimal, optional: false]}]}}

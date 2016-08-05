@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Generate do
 
 	def run(_) do
 		# Import all the modules
-		require Application
+    Mix.Task.run "app.start", []
 
 		# Get the args
 		args = CLI.get_args()
@@ -14,20 +14,10 @@ defmodule Mix.Tasks.Generate do
 			System.halt 1
 		end
 
-		# Start the connection
-		{:ok, connection} = Model_Generator.connect(args[:hostname], args[:database], args[:username], args[:password])
+    inited_config = %Config{}
+    config = Map.merge(inited_config, args)
 
-		# If they provided a table get its structure and generate a model based on it
-		if args[:table] do
-			Model_Generator.generate(connection, args[:database], args[:table], args[:project])
-		else
-			tables = Model_Generator.get_tables(connection, args[:database])
-			Enum.each tables, fn(table) ->
-				Model_Generator.generate(connection, args[:database], elem(table, 0), args[:project])
-			end
-		end
-
-		# Always kill the connection when we're done
-		Model_Generator.terminate(connection)
+    ModelGenerator.start("postgres", config, args[:project])
+    
 	end
 end

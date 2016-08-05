@@ -1,38 +1,36 @@
-defmodule Model_Generator do
+defmodule ModelGenerator do
 
-  # Open a mariaex connection
-  def connect(hostname, database, username, password) do
-    Mariaex.Connection.start_link(hostname: hostname, database: database, username: username, password: password)
+  def start(adapter_name, %Config{} = config, project_name \\ "Entry") do
+    {:ok, pid} = call(adapter_name, :get_pid, [config]) 
+    tables = call(adapter_name, :get_tables, [pid])
+
+    Enum.each tables, fn(table) ->
+      generate(adapter_name, pid, config, hd(table), project_name)
+    end
   end
 
-  # Kill the connection
-  def terminate(p) do
-    Mariaex.Connection.stop(p)
-  end
-
-  # Get all the tables in a database
-  def get_tables(connection, db) do
-    {:ok, result} = Mariaex.Connection.query(connection, "SELECT table_name FROM information_schema.tables WHERE table_schema=?;", [db])
-    result.rows
-  end
 
   # Perform query to get schema and generate results
-  def generate(connection, db, table, project_name) do
-    {:ok, result} = Mariaex.Connection.query(connection, "SELECT column_name, data_type, CASE WHEN `COLUMN_KEY` = 'PRI' THEN '1' ELSE NULL END AS primary_key FROM information_schema.columns WHERE table_name=? AND table_schema=?;", [table, db])
+  defp generate(adapter_name, pid, %Config{} = config, table, project_name) do
+    db = config.database
+    rows = call(adapter_name, :get_table_columns_meta, [pid, db, table])
 
-    write_model(db, table, result.rows, project_name)
+    unless table == "schema_migrations" do
+      write_model(adapter_name, db, table, rows, project_name)
+    end
   end
-
+    
   # Loop through the rows and output to a file
-  defp write_model(db, table, rows, project_name) do
+  defp write_model(adapter_name, db, table, rows, project_name) do
 
 		# Downcased table and db so we can interpolate
     lc_table = String.downcase(table)
     lc_db = String.downcase(db)
 
 		# Map the rows to their associated types
+    rows = Enum.map(rows, fn(list) ->  List.to_tuple(list) end)
 		mapped_rows = Enum.map rows, fn {name, type, is_primary} ->
-      { name, get_type(type), is_primary }
+      { name, call(adapter_name, :mapping_column_type, [type]), is_primary }
     end
 
     primary_key = Enum.find mapped_rows, fn(row) ->
@@ -67,27 +65,13 @@ defmodule Model_Generator do
     IO.puts "Model created: #{filename}"
   end
 
-  # Get the type of a row
-  def get_type(row) do
-
-    # Match the type and return the atom representing it
-    case row do
-      type when type in ["int", "bigint", "mediumint", "smallint", "tinyint"] ->
-        ":integer"
-      type when type in ["varchar", "text", "char", "year", "mediumtext", "longtext", "tinytext", "enum"] ->
-        ":string"
-      type when type in ["decimal", "float", "double"] ->
-        ":float"
-      type when type in ["bit"] ->
-        ":boolean"
-      type when type in ["date"] ->
-        "Ecto.Date"
-      type when type in ["datetime", "timestamp"] ->
-        "Ecto.DateTime"
-      type when type in ["time"] ->
-        ":time"
-      type when type in ["blob"] ->
-        ":binary"
-    end
+  defp call(class_name, method, args \\ []) do
+    call_method = unless is_atom(method) do
+                    String.to_atom(method)
+                  else              
+                    method
+                  end
+    apply(Module.concat(["#{String.capitalize(class_name)}Processor"]), call_method, args)
   end
+
 end

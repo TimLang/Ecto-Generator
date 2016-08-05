@@ -21,11 +21,11 @@ defmodule CLI do
         end
 
       arg_count when arg_count === 0 ->
-        IO.puts "Usage: mix generate --hostname <hostname> --database <database> --table <table> --username <username> --password <password>"
+        IO.puts "Usage: mix generate --hostname <hostname> --database <database> --table <table> --username <username> --password <password> --adapter <postgres>"
         false
       # Fallback
       _ ->
-        IO.puts "Usage: mix generate --hostname <hostname> --database <database> --table <table> --username <username> --password <password>"
+        IO.puts "Usage: mix generate --hostname <hostname> --database <database> --table <table> --username <username> --password <password> --adapter <postgres>"
         false
     end
   end
