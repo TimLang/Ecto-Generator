@@ -28,6 +28,8 @@ defmodule PostgresProcessor do
       type when type in ["timestamp", "timestamp without time zone"] ->
         "Ecto.DateTime"
         #Array? how to do?
+      type when type in ["ARRAY"] ->
+        "{:array, :string}"
       _ ->
         IO.puts "no mapping: #{row}"
         ":unknown"
