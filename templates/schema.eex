@@ -1,5 +1,5 @@
 defmodule <%= (project_name || db) <> "." <> String.capitalize(table) |> String.replace_suffix("s", "") |> Inflex.camelize  %> do
-  use Ecto.Model
+  use Ecto.Schema
 <%= if is_tuple(primary_key) do %>
   @primary_key { :<%= String.downcase(elem(primary_key,0)) %>, :integer, [] }
 <% end %>
